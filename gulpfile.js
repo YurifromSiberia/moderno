@@ -1,70 +1,63 @@
-let gulp = require('gulp'),
-    sass = require('gulp-sass'),
-    rename = require('gulp-rename'),
-    browserSync = require('browser-sync'),
-    autoprefixer = require('gulp-autoprefixer'),
-    concat = require('gulp-concat'),
-    uglify = require('gulp-uglify'),
-    cssmin = require('gulp-cssmin');
+import gulp from 'gulp'; // Основной модуль
+import { path } from './gulp/config/path.js'; // Импорт путей
+import { plugins } from './gulp/config/plugins.js'; // Импорт общих плагинов
 
+// Передаем значения в глобальную переменную и добавляем комментарий для eslint:
+/* global global process*/
+global.app = {
+  isBuild: process.argv.includes('--build'),
+  isDev: !process.argv.includes('--build'),
+  path: path,
+  gulp: gulp,
+  plugins: plugins
+};
 
+// Импорт задач
+import { copy } from './gulp/tasks/copy.js';
+import { html } from './gulp/tasks/html.js';
+import { reset } from './gulp/tasks/reset.js';
+import { server } from './gulp/tasks/server.js';
+import { scss } from './gulp/tasks/scss.js';
+import { js } from './gulp/tasks/js.js';
+import { images } from './gulp/tasks/images.js';
+import { otfToTtf, ttfToWoff, fontStyle } from './gulp/tasks/fonts.js';
+import { svgSprive } from './gulp/tasks/svgSprive.js';
+import { zip } from './gulp/tasks/zip.js';
+import { ftp } from './gulp/tasks/ftp.js';
 
-gulp.task('sass', function() {
-    return gulp.src('app/scss/style.scss')
-        .pipe(sass({ outputStyle: 'compressed' }))
-        .pipe(rename({ suffix: '.min' }))
-        .pipe(autoprefixer({
-            overrideBrowserslist: ['last 8 versions']
-        }))
-        .pipe(gulp.dest('app/css'))
-        .pipe(browserSync.reload({ stream: true }))
-});
+// Наблюдатель за изменениями в файлах
+function watcher() {
+  gulp.watch(path.watch.files, copy);
+  //Для отображения изменений на сервере можно создать серию задач:
+  //gulp.watch(path.watch.html, gulp.series(html, ftp) и также с прочими задачами.
+  gulp.watch(path.watch.html, html);
+  gulp.watch(path.watch.scss, scss);
+  gulp.watch(path.watch.js, js);
+  gulp.watch(path.watch.images, images);
+}
 
-gulp.task('style', function() {
-    return gulp.src([
-            'node_modules/normalize.css/normalize.css',
-            'node_modules/slick-carousel/slick/slick.css',
-            'node_modules/magnific-popup/dist/magnific-popup.css'
-        ])
-        .pipe(concat('libs.min.css'))
-        .pipe(cssmin())
-        .pipe(gulp.dest('app/css'))
-});
+// Спрайты создаются разово, поэтому нет необходимости их включать в общий поток задач
+export { svgSprive };
+// Создание спрайта выполняется через команду npm run svgSprive.
 
-gulp.task('script', function() {
-    return gulp.src([
+// Последовательная обработка шрифтов
+const fonts = gulp.series(otfToTtf, ttfToWoff, fontStyle);
 
-            'node_modules/slick-carousel/slick/slick.js',
-            'node_modules/magnific-popup/dist/jquery.magnific-popup.js'
-        ])
-        .pipe(concat('libs.min.js'))
-        .pipe(uglify())
-        .pipe(gulp.dest('app/js'))
-});
+// Основные задачи
+const mainTasks = gulp.series(fonts, gulp.parallel(copy, html, scss, js, images));
 
-gulp.task('js', function() {
-    return gulp.src('app/js/*.js')
-        .pipe(browserSync.reload({ stream: true }))
-});
+// Построение сценариев выполнения задач
+const build = gulp.series(reset, mainTasks);
+const dev = gulp.series(reset, mainTasks, gulp.parallel(watcher, server));
+const deployZIP = gulp.series(reset, mainTasks, zip);
+const deployFTP = gulp.series(reset, mainTasks, ftp);
 
-gulp.task('html', function() {
-    return gulp.src('app/*.html')
-        .pipe(browserSync.reload({ stream: true }))
-});
+// Экспорт сценариев для добавления в скрипт в package.json
+export { dev };
+export { build };
+export { deployZIP };
+export { deployFTP };
+// Вызов сценария командой npm run dev или npm run build
 
-gulp.task('browser-sync', function() {
-    browserSync.init({
-        server: {
-            baseDir: "app/"
-        }
-    });
-});
-
-gulp.task('watch', function() {
-    gulp.watch('app/scss/style.scss', gulp.parallel('sass'))
-    gulp.watch('app/*.html', gulp.parallel('html'))
-    gulp.watch('app/js/*.js', gulp.parallel('js'))
-
-});
-
-gulp.task('default', gulp.parallel('style', 'script', 'sass', 'watch', 'browser-sync'))
+// Выполнение сценария по умолчанию
+gulp.task('default', dev);
