@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/style.min.css"/>
+  <title>Главная</title>
+</head>
+	
+	<body>
+		<!-- Шапка сайта -->
+		<header class="main-header">
+  <nav class="main-nav container">
+    <a href="##" class="logo"><img src="" alt=""/></a>
+    <a href="tel:88126901010" class="phone-number">8 (812) 690-10-10</a>
+    <a href="javascript:void(0);" class="burger-menu" onclick="myFunction()"><span class="burger-icon"></span></a>
+    <ul class="nav-list">
+      <li class="nav-list__item"><a href="##" class="nav-list__link">Point1</a></li>
+      <li class="nav-list__item"><a href="##" class="nav-list__link">Point2</a></li>
+      <li class="nav-list__item"><a href="##" class="nav-list__link">Point3</a></li>
+      <li class="nav-list__item"><a href="##" class="nav-list__link">Point4</a></li>
+      <li class="nav-list__item"><a href="##" class="nav-list__link">Point5</a></li>
+    </ul>
+  </nav>
+</header>
+		
+		<!-- Основной контент -->
+		<main class="main container">
+			<section class="main__content">
+				<h1 class="main__title">Сборка html страницы</h1>
+				<p class="description">Сборка html страницы осуществляется плагином gulp-file-include. Для того чтобы вставить на страницу фрагмент из другого html файла (например содержимое файл head.html), необходимо использовать директиву <b><code>@\@include('html/head.html', {"title": "Главная страница"})</code></b>. В фигурных скобках можно указать несколько переменных, значение которых подставится в вёрстку вызываемого файла. В данном случае у вызываемого файла head.html в теге <b><code>&lt;title&gt;@@title&lt;/title&gt;</code></b> находится имя переменной, вместо которого подставятся слова "Главная страница". В случае если мы будем использовать эту шапку при сборке другой страницы, например при сборке страницы catalog.html то в директиве include мы уже укажем другое значение переменной title. Например { "title": "Каталог" }. И у страницы catalog.html будет <b><code>&lt;title&gt;Каталог&lt;/title&gt;</code></b>
+				</p>
+			</section>
+		</main>
+
+		<!-- Подвал сайта -->
+		<footer class="main-footer">
+	<section class="main-footer__content container">
+		<div class="main-footer__wrapper">
+			<h3 class="main-footer__title">Вставка изображения через тег <code>&lt;img&gt;</code></h3>
+			<img src="img/Night_sky.jpg" width="200" height="110" alt="" />
+		</div>
+		<div class="main-footer__wrapper">
+			<a class="main-footer__link" href="##">Ссылка</a>
+			<p class="main-footer__copyright">©2022 Все права защищены</p>
+		</div>
+	</section>
+</footer>
+
+		
+		<script src="js/app.min.js"></script>
+	</body>
+</html>
